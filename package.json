@@ -1,11 +1,11 @@
 {
-  "name": "api",
+  "name": "lync-api",
   "version": "1.0.0",
   "scripts": {
     "dev": "pnpm tsx watch ./src/http/server.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "Leandro Cruz",
   "license": "ISC",
   "packageManager": "pnpm@10.18.0",
   "dependencies": {

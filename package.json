@@ -2,7 +2,8 @@
   "name": "lync-api",
   "version": "1.0.0",
   "scripts": {
-    "dev": "pnpm tsx watch ./src/http/server.ts"
+    "dev": "pnpm tsx watch ./src/http/server.ts",
+    "seed": "pnpm tsx ./prisma/seed.ts"
   },
   "keywords": [],
   "author": "Leandro Cruz",
@@ -11,11 +12,13 @@
   "dependencies": {
     "@fastify/cors": "^11.1.0",
     "@prisma/client": "6.17.1",
+    "bcryptjs": "^3.0.2",
     "fastify": "^5.6.1",
     "fastify-type-provider-zod": "^6.0.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.1.0",
     "@types/node": "^24.7.2",
     "prisma": "^6.17.1",
     "tsx": "^4.20.6",

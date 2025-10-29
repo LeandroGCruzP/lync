@@ -1,9 +1,11 @@
 {
   "name": "lync-api",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "pnpm tsx watch ./src/http/server.ts",
-    "seed": "pnpm tsx ./prisma/seed.ts"
+    "dev": "pnpm env:load tsx watch ./src/http/server.ts",
+    "seed": "pnpm tsx ./prisma/seed.ts",
+    "env:load": "dotenv -e .env"
   },
   "keywords": [],
   "author": "Leandro Cruz",
@@ -11,15 +13,19 @@
   "packageManager": "pnpm@10.18.0",
   "dependencies": {
     "@fastify/cors": "^11.1.0",
+    "@fastify/jwt": "^10.0.0",
     "@prisma/client": "6.17.1",
+    "@t3-oss/env-nextjs": "^0.13.8",
     "bcryptjs": "^3.0.2",
     "fastify": "^5.6.1",
+    "fastify-plugin": "^5.1.0",
     "fastify-type-provider-zod": "^6.0.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.1.0",
     "@types/node": "^24.7.2",
+    "dotenv-cli": "^11.0.0",
     "prisma": "^6.17.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"

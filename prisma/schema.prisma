@@ -1,0 +1,299 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TokenType {
+  PASSWORD_RECOVER
+}
+
+model Token {
+  id        String    @id @default(uuid())
+  type      TokenType
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  @@map("tokens")
+}
+
+enum AccountProvider {
+  GOOGLE
+}
+
+model Account {
+  id                String          @id @default(uuid())
+  provider          AccountProvider
+  providerAccountId String          @map("provider_account_id")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  @@unique([provider, userId])
+  @@map("accounts")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String?  @map("password_hash")
+  avatarUrl    String?  @map("avatar_url")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  tokens        Token[]
+  accounts      Account[]
+  memberInvites MemberInvite[]
+  eventInvites  EventInvite[]
+  members       Member[]
+  organizations Organization[]
+  teams         Team[]
+  events        Event[]
+  players       Player[]
+  teamInvites   TeamInvite[]
+  participants  Participant[]
+
+  @@map("users")
+}
+
+model Organization {
+  id                        String   @id @default(uuid())
+  name                      String
+  slug                      String   @unique
+  domain                    String?  @unique
+  shouldAttachUsersByDomain Boolean  @default(false) @map("should_attach_users_by_domain")
+  avatarUrl                 String?  @map("avatar_url")
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  ownerId String @map("owner_id")
+
+  memberInvites MemberInvite[]
+  members       Member[]
+  events        Event[]
+  teams         Team[]
+
+  @@map("organizations")
+}
+
+enum MemberRole {
+  ADMIN
+  MEMBER
+}
+
+model MemberInvite {
+  id         String     @id @default(uuid())
+  email      String
+  memberRole MemberRole
+  createdAt  DateTime   @default(now()) @map("created_at")
+
+  author     User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId   String? @map("author_id")
+  authorName String? @map("author_name")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @map("organization_id")
+
+  @@unique([email, organizationId])
+  @@index([email])
+  @@map("member_invites")
+}
+
+model Member {
+  id         String     @id @default(uuid())
+  memberRole MemberRole @default(MEMBER)
+  joinedAt   DateTime   @default(now()) @map("joined_at")
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String       @map("organization_id")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  @@unique([organizationId, userId])
+  @@map("members")
+}
+
+enum SportType {
+  TEAM
+  INDIVIDUAL
+}
+
+enum CompetitionFormat {
+  MATCH
+  SCORE_BASED
+  TIME_TRIAL
+  PERFORMANCE
+  ELIMINATION
+}
+
+model Sport {
+  id                String            @id @default(uuid())
+  name              String
+  sportType         SportType
+  competitionFormat CompetitionFormat
+
+  events Event[]
+
+  @@map("sports")
+}
+
+model Event {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  slug        String    @unique
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime? @map("end_date")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  ownerId String @map("owner_id")
+
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String?       @map("organization_id")
+
+  sport   Sport  @relation(fields: [sportId], references: [id], onDelete: Restrict)
+  sportId String @map("sport_id")
+
+  eventInvites  EventInvite[]
+  eventSettings EventSettings?
+  participants  Participant[]
+
+  @@map("events")
+}
+
+model EventSettings {
+  id             String @id @default(uuid())
+  slots          Int?
+  playersPerTeam Int?
+
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId String @map("event_id")
+
+  @@unique([eventId])
+  @@map("event_settings")
+}
+
+model EventInvite {
+  id        String          @id @default(uuid())
+  email     String
+  eventRole ParticipantRole
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  author     User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId   String? @map("author_id")
+  authorName String? @map("author_name")
+
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId String @map("event_id")
+
+  @@unique([email, eventId])
+  @@index([email])
+  @@map("event_admin_invites")
+}
+
+enum ParticipantRole {
+  ADMIN
+  PARTICIPANT
+}
+
+enum ParticipantType {
+  TEAM
+  PLAYER
+}
+
+model Participant {
+  id              String          @id @default(uuid())
+  participantType ParticipantType
+  participantRole ParticipantRole @default(PARTICIPANT)
+  joinedAt        DateTime        @default(now()) @map("joined_at")
+
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId String @map("event_id")
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String? @map("user_id")
+
+  team   Team?   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId String? @map("team_id")
+
+  @@unique([eventId, teamId])
+  @@unique([eventId, userId])
+  @@map("participants")
+}
+
+model Team {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  slug        String   @unique
+  avatarUrl   String?  @map("avatar_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  ownerId String @map("owner_id")
+
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  organizationId String?       @map("organization_id")
+
+  teamInvites  TeamInvite[]
+  players      Player[]
+  participants Participant[]
+
+  @@map("teams")
+}
+
+enum TeamRole {
+  ADMIN
+  PLAYER
+}
+
+model TeamInvite {
+  id        String   @id @default(uuid())
+  email     String
+  teamRole  TeamRole
+  createdAt DateTime @default(now()) @map("created_at")
+
+  author     User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorId   String? @map("author_id")
+  authorName String? @map("author_name")
+
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId String @map("team_id")
+
+  @@unique([email, teamId])
+  @@index([email])
+  @@map("team_invites")
+}
+
+model Player {
+  id       String   @id @default(uuid())
+  teamRole TeamRole @default(PLAYER)
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId String @map("team_id")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  @@unique([teamId, userId])
+  @@map("players")
+}

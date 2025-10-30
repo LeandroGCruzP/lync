@@ -4,6 +4,9 @@ import { createAccount } from './auth/create-account'
 import { getProfile } from './auth/get-profile'
 import { requestPasswordRecover } from './auth/request-password-recover'
 import { resetPassword } from './auth/reset-password'
+import { getMembers } from './members/get-members'
+import { removeMember } from './members/remove-members'
+import { updateMemberRole } from './members/update-member-role'
 import { createOrganization } from './organizations/create-organization'
 import { getMembership } from './organizations/get-membership'
 import { getOrganization } from './organizations/get-organization'
@@ -28,4 +31,9 @@ export async function routes(app: FastifyInstance) {
   app.register(shutdownOrganization)
   app.register(transferOrganization)
   app.register(updateOrganization)
+
+  // Member routes
+  app.register(getMembers)
+  app.register(removeMember)
+  app.register(updateMemberRole)
 }

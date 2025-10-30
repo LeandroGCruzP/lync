@@ -107,9 +107,9 @@ async function seed() {
       members: {
         createMany: {
           data: [
-            { userId: user1.id, memberRole: 'ADMIN' },
-            { userId: user2.id, memberRole: 'MEMBER' },
-            { userId: user3.id, memberRole: 'MEMBER' },
+            { userId: user1.id, role: 'ADMIN' },
+            { userId: user2.id, role: 'MEMBER' },
+            { userId: user3.id, role: 'MEMBER' },
           ],
         },
       },
@@ -127,9 +127,9 @@ async function seed() {
       members: {
         createMany: {
           data: [
-            { userId: user2.id, memberRole: 'ADMIN' },
-            { userId: user4.id, memberRole: 'MEMBER' },
-            { userId: user5.id, memberRole: 'MEMBER' },
+            { userId: user2.id, role: 'ADMIN' },
+            { userId: user4.id, role: 'MEMBER' },
+            { userId: user5.id, role: 'MEMBER' },
           ],
         },
       },
@@ -148,9 +148,9 @@ async function seed() {
       players: {
         createMany: {
           data: [
-            { userId: user1.id, teamRole: 'ADMIN' },
-            { userId: user2.id, teamRole: 'PLAYER' },
-            { userId: user3.id, teamRole: 'PLAYER' },
+            { userId: user1.id, role: 'ADMIN' },
+            { userId: user2.id, role: 'PLAYER' },
+            { userId: user3.id, role: 'PLAYER' },
           ],
         },
       },
@@ -168,9 +168,9 @@ async function seed() {
       players: {
         createMany: {
           data: [
-            { userId: user2.id, teamRole: 'ADMIN' },
-            { userId: user4.id, teamRole: 'PLAYER' },
-            { userId: user5.id, teamRole: 'PLAYER' },
+            { userId: user2.id, role: 'ADMIN' },
+            { userId: user4.id, role: 'PLAYER' },
+            { userId: user5.id, role: 'PLAYER' },
           ],
         },
       },
@@ -199,12 +199,12 @@ async function seed() {
           data: [
             {
               participantType: 'TEAM',
-              participantRole: 'ADMIN',
+              role: 'ADMIN',
               teamId: team1.id,
             },
             {
               participantType: 'TEAM',
-              participantRole: 'PARTICIPANT',
+              role: 'PARTICIPANT',
               teamId: team2.id,
             },
           ],
@@ -234,7 +234,7 @@ async function seed() {
           data: [
             {
               participantType: 'TEAM',
-              participantRole: 'ADMIN',
+              role: 'ADMIN',
               teamId: team2.id,
             },
           ],
@@ -261,17 +261,17 @@ async function seed() {
           data: [
             {
               participantType: 'PLAYER',
-              participantRole: 'ADMIN',
+              role: 'ADMIN',
               userId: user3.id,
             },
             {
               participantType: 'PLAYER',
-              participantRole: 'PARTICIPANT',
+              role: 'PARTICIPANT',
               userId: user1.id,
             },
             {
               participantType: 'PLAYER',
-              participantRole: 'PARTICIPANT',
+              role: 'PARTICIPANT',
               userId: user4.id,
             },
           ],
@@ -284,7 +284,7 @@ async function seed() {
   await prisma.memberInvite.create({
     data: {
       email: 'invite1@example.com',
-      memberRole: 'MEMBER',
+      role: 'MEMBER',
       authorId: user1.id,
       authorName: user1.name,
       organizationId: org1.id,
@@ -294,7 +294,7 @@ async function seed() {
   await prisma.memberInvite.create({
     data: {
       email: 'invite2@example.com',
-      memberRole: 'ADMIN',
+      role: 'ADMIN',
       authorId: user2.id,
       authorName: user2.name,
       organizationId: org2.id,
@@ -305,7 +305,7 @@ async function seed() {
   await prisma.eventInvite.create({
     data: {
       email: 'eventinvite1@example.com',
-      eventRole: 'PARTICIPANT',
+      role: 'PARTICIPANT',
       authorId: user1.id,
       authorName: user1.name,
       eventId: event1.id,
@@ -315,7 +315,7 @@ async function seed() {
   await prisma.eventInvite.create({
     data: {
       email: 'eventinvite2@example.com',
-      eventRole: 'ADMIN',
+      role: 'ADMIN',
       authorId: user2.id,
       authorName: user2.name,
       eventId: event2.id,
@@ -326,7 +326,7 @@ async function seed() {
   await prisma.teamInvite.create({
     data: {
       email: 'teaminvite1@example.com',
-      teamRole: 'PLAYER',
+      role: 'PLAYER',
       authorId: user1.id,
       authorName: user1.name,
       teamId: team1.id,
@@ -336,7 +336,7 @@ async function seed() {
   await prisma.teamInvite.create({
     data: {
       email: 'teaminvite2@example.com',
-      teamRole: 'ADMIN',
+      role: 'ADMIN',
       authorId: user2.id,
       authorName: user2.name,
       teamId: team2.id,

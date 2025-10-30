@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "pnpm env:load tsx watch ./src/http/server.ts",
     "seed": "pnpm tsx ./prisma/seed.ts",
+    "prisma:migrate": "pnpm prisma migrate dev",
     "env:load": "dotenv -e .env"
   },
   "keywords": [],

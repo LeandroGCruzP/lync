@@ -96,10 +96,10 @@ enum MemberRole {
 }
 
 model MemberInvite {
-  id         String     @id @default(uuid())
-  email      String
-  memberRole MemberRole
-  createdAt  DateTime   @default(now()) @map("created_at")
+  id        String     @id @default(uuid())
+  email     String
+  role      MemberRole
+  createdAt DateTime   @default(now()) @map("created_at")
 
   author     User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorId   String? @map("author_id")
@@ -114,9 +114,9 @@ model MemberInvite {
 }
 
 model Member {
-  id         String     @id @default(uuid())
-  memberRole MemberRole @default(MEMBER)
-  joinedAt   DateTime   @default(now()) @map("joined_at")
+  id       String     @id @default(uuid())
+  role     MemberRole @default(MEMBER)
+  joinedAt DateTime   @default(now()) @map("joined_at")
 
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String       @map("organization_id")
@@ -193,7 +193,7 @@ model EventSettings {
 model EventInvite {
   id        String          @id @default(uuid())
   email     String
-  eventRole ParticipantRole
+  role      ParticipantRole
   createdAt DateTime        @default(now()) @map("created_at")
 
   author     User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
@@ -221,7 +221,7 @@ enum ParticipantType {
 model Participant {
   id              String          @id @default(uuid())
   participantType ParticipantType
-  participantRole ParticipantRole @default(PARTICIPANT)
+  role            ParticipantRole @default(PARTICIPANT)
   joinedAt        DateTime        @default(now()) @map("joined_at")
 
   event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -268,7 +268,7 @@ enum TeamRole {
 model TeamInvite {
   id        String   @id @default(uuid())
   email     String
-  teamRole  TeamRole
+  role      TeamRole
   createdAt DateTime @default(now()) @map("created_at")
 
   author     User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
@@ -285,7 +285,7 @@ model TeamInvite {
 
 model Player {
   id       String   @id @default(uuid())
-  teamRole TeamRole @default(PLAYER)
+  role     TeamRole @default(PLAYER)
   joinedAt DateTime @default(now()) @map("joined_at")
 
   team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)

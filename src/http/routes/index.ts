@@ -4,6 +4,13 @@ import { createAccount } from './auth/create-account'
 import { getProfile } from './auth/get-profile'
 import { requestPasswordRecover } from './auth/request-password-recover'
 import { resetPassword } from './auth/reset-password'
+import { createOrganization } from './organizations/create-organization'
+import { getMembership } from './organizations/get-membership'
+import { getOrganization } from './organizations/get-organization'
+import { getOrganizations } from './organizations/get-organizations'
+import { shutdownOrganization } from './organizations/shutdown-organization'
+import { transferOrganization } from './organizations/transfer-organization'
+import { updateOrganization } from './organizations/update-organization'
 
 export async function routes(app: FastifyInstance) {
   // Auth routes
@@ -12,4 +19,13 @@ export async function routes(app: FastifyInstance) {
   app.register(getProfile)
   app.register(requestPasswordRecover)
   app.register(resetPassword)
+
+  // Organization routes
+  app.register(createOrganization)
+  app.register(getMembership)
+  app.register(getOrganization)
+  app.register(getOrganizations)
+  app.register(shutdownOrganization)
+  app.register(transferOrganization)
+  app.register(updateOrganization)
 }

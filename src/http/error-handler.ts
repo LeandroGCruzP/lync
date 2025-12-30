@@ -44,7 +44,7 @@ export const errorHandler: FastifyErrorHandler = (error, _, reply) => {
   }
 
   if (error instanceof UnauthorizedError) {
-    return reply.status(400).send({
+    return reply.status(401).send({
       message: error.message,
     })
   }

@@ -57,6 +57,35 @@ describe('Organizations (e2e)', () => {
     expect(response.statusCode).toEqual(400)
   })
 
+  it('should not be able to update domain of an organization with an existing domain', async () => {
+    const { user, token } = await createAndAuthenticateUser(app)
+    const domain = faker.internet.domainName()
+    const name1 = faker.company.name()
+    const name2 = faker.company.name()
+
+    const org = await makeOrganization({
+      ownerId: user.id,
+    })
+
+    await request(app.server)
+      .post('/organizations')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        name: name1,
+        domain,
+      })
+
+    const response = await request(app.server)
+      .put(`/organizations/${org.slug}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        name: name2,
+        domain,
+      })
+
+    expect(response.statusCode).toEqual(400)
+  })
+
   it('should be able to get organizations where user is a member', async () => {
     const { user, token } = await createAndAuthenticateUser(app)
 

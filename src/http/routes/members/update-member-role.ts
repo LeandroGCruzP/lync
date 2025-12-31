@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { auth } from '~/http/middlewares/auth'
 import { prisma } from '~/lib/prisma'
 import { getUserPermissions } from '~/utils/get-user-permissions'
+import { BadRequestError } from '../_errors/bad-request-error'
 import { UnauthorizedError } from '../_errors/unauthorized-error'
 
 export async function updateMemberRole(app: FastifyInstance) {
@@ -45,6 +46,23 @@ export async function updateMemberRole(app: FastifyInstance) {
         }
 
         const { role } = request.body
+
+        const member = await prisma.member.findUnique({
+          where: {
+            id: memberId,
+            organizationId: organization.id,
+          },
+        })
+
+        if (!member) {
+          throw new BadRequestError('Member not found')
+        }
+
+        if (member.userId === organization.ownerId) {
+          throw new UnauthorizedError(
+            `You're not allowed to update this member`,
+          )
+        }
 
         await prisma.member.update({
           where: {

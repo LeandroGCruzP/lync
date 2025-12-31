@@ -6,7 +6,9 @@
     "dev": "pnpm env:load tsx watch ./src/http/server.ts",
     "seed": "pnpm tsx ./prisma/seed.ts",
     "prisma:migrate": "pnpm prisma migrate dev",
-    "env:load": "dotenv -e .env"
+    "env:load": "dotenv -e .env",
+    "test": "pnpm env:load vitest",
+    "test:watch": "pnpm env:load vitest"
   },
   "keywords": [],
   "author": "Leandro Cruz",
@@ -29,9 +31,13 @@
     "@faker-js/faker": "^10.1.0",
     "@types/node": "^24.7.2",
     "@types/nodemailer": "^7.0.4",
+    "@types/supertest": "^6.0.3",
     "dotenv-cli": "^11.0.0",
     "prisma": "^6.17.1",
+    "supertest": "^7.1.4",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite-tsconfig-paths": "^6.0.3",
+    "vitest": "^4.0.16"
   }
 }

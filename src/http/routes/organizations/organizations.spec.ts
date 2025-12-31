@@ -15,7 +15,7 @@ describe('Organizations (e2e)', () => {
     await app.close()
   })
 
-  it('should be able to create a new organization', async () => {
+  it('should be able for any user to create a new organization', async () => {
     const { token } = await createAndAuthenticateUser(app)
     const domain = faker.internet.domainName()
     const name = faker.company.name()
@@ -102,8 +102,7 @@ describe('Organizations (e2e)', () => {
     expect(response.body.organizations[0].name).toEqual(org.name)
   })
 
-
-  it('should be able to update an organization', async () => {
+  it('should be able to update an organization where user is owner', async () => {
     const { user, token } = await createAndAuthenticateUser(app)
     const domain = faker.internet.domainName()
     const name = faker.company.name()
@@ -157,7 +156,7 @@ describe('Organizations (e2e)', () => {
     expect(response.statusCode).toEqual(401)
   })
 
-  it('should be able to shutdown an organization', async () => {
+  it('should be able to shutdown an organization where user is owner', async () => {
     const { user, token } = await createAndAuthenticateUser(app)
 
     const org = await makeOrganization({
@@ -200,7 +199,7 @@ describe('Organizations (e2e)', () => {
     expect(response.statusCode).toEqual(401)
   })
 
-  it('should be able to transfer organization ownership', async () => {
+  it('should be able to transfer organization ownership where user is owner', async () => {
     const { user, token } = await createAndAuthenticateUser(app)
     const newOwner = await makeUser()
 

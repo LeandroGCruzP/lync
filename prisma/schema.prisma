@@ -168,8 +168,8 @@ model Event {
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String?       @map("organization_id")
 
-  sport   Sport  @relation(fields: [sportId], references: [id], onDelete: Restrict)
-  sportId String @map("sport_id")
+  sport   Sport?  @relation(fields: [sportId], references: [id], onDelete: SetNull)
+  sportId String? @map("sport_id")
 
   eventInvites  EventInvite[]
   eventSettings EventSettings?

@@ -146,4 +146,56 @@ describe('Create Event (e2e)', () => {
 
       expect(response.statusCode).toEqual(401)
   })
+  it('should be able to create a paid event (PAY_TO_REGISTER)', async () => {
+    const { token } = await createAndAuthenticateUser(app)
+    const name = faker.lorem.words(3)
+    const price = 50
+
+    const response = await request(app.server)
+        .post('/events')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+            name,
+            startDate: new Date(),
+            price,
+            paymentModel: 'PAY_TO_REGISTER'
+        })
+
+    expect(response.statusCode).toEqual(201)
+
+    const event = await prisma.event.findUnique({
+        where: { id: response.body.eventId },
+        include: { eventSettings: true }
+    })
+
+    expect(event?.eventSettings?.price).toEqual(expect.any(Object)) // Decimal check
+    expect(Number(event?.eventSettings?.price)).toEqual(price)
+    expect(event?.eventSettings?.paymentModel).toEqual('PAY_TO_REGISTER')
+  })
+
+  it('should be able to create a paid event (PAY_TO_CONFIRM)', async () => {
+    const { token } = await createAndAuthenticateUser(app)
+    const name = faker.lorem.words(3)
+    const price = 100
+
+    const response = await request(app.server)
+        .post('/events')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+            name,
+            startDate: new Date(),
+            price,
+            paymentModel: 'PAY_TO_CONFIRM'
+        })
+
+    expect(response.statusCode).toEqual(201)
+
+    const event = await prisma.event.findUnique({
+        where: { id: response.body.eventId },
+        include: { eventSettings: true }
+    })
+
+    expect(Number(event?.eventSettings?.price)).toEqual(price)
+    expect(event?.eventSettings?.paymentModel).toEqual('PAY_TO_CONFIRM')
+  })
 })

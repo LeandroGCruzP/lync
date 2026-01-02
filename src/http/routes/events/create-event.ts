@@ -5,6 +5,7 @@ import { auth } from "~/http/middlewares/auth";
 import { prisma } from "~/lib/prisma";
 import { createSlug } from "~/utils/create-slug";
 import { UnauthorizedError } from "../_errors/unauthorized-error";
+import { PaymentModel } from "@prisma/client";
 
 export async function createEvent(app: FastifyInstance) {
   app
@@ -23,14 +24,16 @@ export async function createEvent(app: FastifyInstance) {
             startDate: z.coerce.date(),
             endDate: z.coerce.date().optional(),
             sportId: z.uuid().optional(),
-            organizationId: z.uuid().optional(),
+            organizationId: z.string().uuid().optional(),
+            price: z.number().optional(),
+            paymentModel: z.enum(PaymentModel).default(PaymentModel.FREE),
           }),
           response: { 201: z.object({ eventId: z.uuid() }) },
         },
       },
       async (request, reply) => {
         const userId = await request.getCurrentUserId()
-        const { name, description, startDate, endDate, sportId, organizationId } = request.body
+        const { name, description, startDate, endDate, sportId, organizationId, price, paymentModel } = request.body
 
         if (organizationId) {
           const member = await prisma.member.findUnique({
@@ -57,6 +60,12 @@ export async function createEvent(app: FastifyInstance) {
             ownerId: userId,
             organizationId,
             sportId,
+            eventSettings: {
+              create: {
+                price,
+                paymentModel,
+              }
+            }
           }
         })
 

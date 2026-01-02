@@ -22,6 +22,7 @@ import { shutdownOrganization } from './organizations/shutdown-organization'
 import { transferOrganization } from './organizations/transfer-organization'
 import { updateOrganization } from './organizations/update-organization'
 import { createEvent } from './events/create-event'
+import { getEvents } from './events/get-events'
 
 export async function routes(app: FastifyInstance) {
   // Auth routes
@@ -56,4 +57,5 @@ export async function routes(app: FastifyInstance) {
 
   // Event routes
   app.register(createEvent)
+  app.register(getEvents)
 }

@@ -24,7 +24,9 @@ export async function createEvent(app: FastifyInstance) {
             startDate: z.coerce.date(),
             endDate: z.coerce.date().optional(),
             sportId: z.uuid().optional(),
-            organizationId: z.string().uuid().optional(),
+            organizationId: z.uuid().optional(),
+            slots: z.number().optional(),
+            playersPerTeam: z.number().optional(),
             price: z.number().optional(),
             paymentModel: z.enum(PaymentModel).default(PaymentModel.FREE),
           }),
@@ -33,7 +35,7 @@ export async function createEvent(app: FastifyInstance) {
       },
       async (request, reply) => {
         const userId = await request.getCurrentUserId()
-        const { name, description, startDate, endDate, sportId, organizationId, price, paymentModel } = request.body
+        const { name, description, startDate, endDate, sportId, organizationId, price, paymentModel, slots, playersPerTeam } = request.body
 
         if (organizationId) {
           const member = await prisma.member.findUnique({
@@ -60,12 +62,10 @@ export async function createEvent(app: FastifyInstance) {
             ownerId: userId,
             organizationId,
             sportId,
-            eventSettings: {
-              create: {
-                price,
-                paymentModel,
-              }
-            }
+            slots,
+            playersPerTeam,
+            price,
+            paymentModel,
           }
         })
 

@@ -273,5 +273,71 @@ describe('Events (e2e)', () => {
       const ids = response.body.events.map((e: any) => e.id)
       expect(ids).not.toContain(eventOwnedByA.id === ids[0] ? 'some-other-id' : 'another-id') // Just a sanity check style, the arrayContaining + length is enough but let's be sure.
     })
+
+    it('should be able to filter events by organization', async () => {
+      const { user, token } = await createAndAuthenticateUser(app)
+      const org = await makeOrganization({ ownerId: user.id })
+
+      const eventInOrg = await prisma.event.create({
+        data: {
+          name: 'Event in Org',
+          slug: `event-in-org-${faker.string.uuid()}`,
+          startDate: new Date(),
+          ownerId: user.id,
+          organizationId: org.id,
+        },
+      })
+
+      const standaloneEvent = await prisma.event.create({
+        data: {
+          name: 'Standalone Event',
+          slug: `standalone-event-${faker.string.uuid()}`,
+          startDate: new Date(),
+          ownerId: user.id,
+        },
+      })
+
+      const response = await request(app.server)
+        .get('/events')
+        .query({ organizationSlug: org.slug })
+        .set('Authorization', `Bearer ${token}`)
+
+      expect(response.statusCode).toEqual(200)
+      expect(response.body.events).toHaveLength(1)
+      expect(response.body.events[0].id).toEqual(eventInOrg.id)
+    })
+
+    it('should be able to filter standalone events', async () => {
+      const { user, token } = await createAndAuthenticateUser(app)
+      const org = await makeOrganization({ ownerId: user.id })
+
+      const eventInOrg = await prisma.event.create({
+        data: {
+          name: 'Event in Org',
+          slug: `event-in-org-${faker.string.uuid()}`,
+          startDate: new Date(),
+          ownerId: user.id,
+          organizationId: org.id,
+        },
+      })
+
+      const standaloneEvent = await prisma.event.create({
+        data: {
+          name: 'Standalone Event',
+          slug: `standalone-event-${faker.string.uuid()}`,
+          startDate: new Date(),
+          ownerId: user.id,
+        },
+      })
+
+      const response = await request(app.server)
+        .get('/events')
+        .query({ filter: 'standalone' })
+        .set('Authorization', `Bearer ${token}`)
+
+      expect(response.statusCode).toEqual(200)
+      expect(response.body.events).toHaveLength(1)
+      expect(response.body.events[0].id).toEqual(standaloneEvent.id)
+    })
   })
 })

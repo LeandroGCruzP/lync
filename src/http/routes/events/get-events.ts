@@ -16,6 +16,10 @@ export async function getEvents(app: FastifyInstance) {
           tags: ['events'],
           summary: 'Get events related to the user',
           security: [{ bearerAuth: [] }],
+          querystring: z.object({
+            organizationSlug: z.string().optional(),
+            filter: z.enum(['standalone']).optional(),
+          }),
           response: {
             200: z.object({
               events: z.array(z.object({
@@ -46,6 +50,7 @@ export async function getEvents(app: FastifyInstance) {
       },
       async (request, reply) => {
         const userId = await request.getCurrentUserId()
+        const { organizationSlug, filter } = request.query
 
         const events = await prisma.event.findMany({
           select: {
@@ -75,16 +80,21 @@ export async function getEvents(app: FastifyInstance) {
             },
           },
           where: {
-            OR: [
-              { ownerId: userId },
+            organization: organizationSlug ? { slug: organizationSlug } : (filter === 'standalone' ? null : undefined),
+            AND: [
               {
-                organization: {
-                  members: {
-                    some: {
-                      userId,
+                OR: [
+                  { ownerId: userId },
+                  {
+                    organization: {
+                      members: {
+                        some: {
+                          userId,
+                        }
+                      }
                     }
                   }
-                }
+                ]
               }
             ]
           },

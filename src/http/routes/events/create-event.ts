@@ -1,11 +1,12 @@
+import { PaymentModel } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { auth } from "~/http/middlewares/auth";
 import { prisma } from "~/lib/prisma";
 import { createSlug } from "~/utils/create-slug";
+import { BadRequestError } from "../_errors/bad-request-error";
 import { UnauthorizedError } from "../_errors/unauthorized-error";
-import { PaymentModel } from "@prisma/client";
 
 export async function createEvent(app: FastifyInstance) {
   app
@@ -19,16 +20,16 @@ export async function createEvent(app: FastifyInstance) {
           summary: 'Create a new event',
           security: [{ bearerAuth: [] }],
           body: z.object({
-            name: z.string(),
             description: z.string().optional(),
-            startDate: z.coerce.date(),
-            endDate: z.coerce.date().optional(),
-            sportId: z.uuid().optional(),
+            endDate: z.iso.datetime({ offset: true }).optional(),
+            name: z.string().min(3, { message: 'Name must be at least 3 characters long' }),
             organizationId: z.uuid().optional(),
-            slots: z.number().optional(),
+            paymentModel: z.enum(PaymentModel).default(PaymentModel.FREE),
             playersPerTeam: z.number().optional(),
             price: z.number().optional(),
-            paymentModel: z.enum(PaymentModel).default(PaymentModel.FREE),
+            slots: z.number().optional(),
+            sportId: z.uuid().optional(),
+            startDate: z.iso.datetime({ offset: true }),
           }),
           response: { 201: z.object({ eventId: z.uuid() }) },
         },
@@ -50,6 +51,16 @@ export async function createEvent(app: FastifyInstance) {
           if (!member || member.role !== 'ADMIN') {
             throw new UnauthorizedError('You are not allowed to create events for this organization.')
           }
+        }
+
+        const eventByName = await prisma.event.findFirst({
+          where: { name },
+        })
+
+        if (eventByName) {
+          throw new BadRequestError(
+            'Another event with this name already exists',
+          )
         }
 
         const event = await prisma.event.create({

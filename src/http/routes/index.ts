@@ -4,6 +4,8 @@ import { createAccount } from './auth/create-account'
 import { getProfile } from './auth/get-profile'
 import { requestPasswordRecover } from './auth/request-password-recover'
 import { resetPassword } from './auth/reset-password'
+import { createEvent } from './events/create-event'
+import { getEvents } from './events/get-events'
 import { acceptMemberInvite } from './member-invites/accept-member-invite'
 import { createMemberInvite } from './member-invites/create-member-invite'
 import { getMemberInvite } from './member-invites/get-member-invite'
@@ -21,8 +23,7 @@ import { getOrganizations } from './organizations/get-organizations'
 import { shutdownOrganization } from './organizations/shutdown-organization'
 import { transferOrganization } from './organizations/transfer-organization'
 import { updateOrganization } from './organizations/update-organization'
-import { createEvent } from './events/create-event'
-import { getEvents } from './events/get-events'
+import { getSports } from './sports/get-sports'
 
 export async function routes(app: FastifyInstance) {
   // Auth routes
@@ -58,4 +59,7 @@ export async function routes(app: FastifyInstance) {
   // Event routes
   app.register(createEvent)
   app.register(getEvents)
+
+  // Sport routes
+  app.register(getSports)
 }

@@ -41,6 +41,16 @@ export async function createOrganization(app: FastifyInstance) {
           }
         }
 
+        const organizationByName = await prisma.organization.findFirst({
+          where: { name },
+        })
+
+        if (organizationByName) {
+          throw new BadRequestError(
+            'Another organization with this name already exists',
+          )
+        }
+
         const organization = await prisma.organization.create({
           data: {
             name,

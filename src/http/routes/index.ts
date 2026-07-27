@@ -5,6 +5,7 @@ import { getProfile } from './auth/get-profile'
 import { requestPasswordRecover } from './auth/request-password-recover'
 import { resetPassword } from './auth/reset-password'
 import { createEvent } from './events/create-event'
+import { getEvent } from './events/get-event'
 import { getEvents } from './events/get-events'
 import { acceptMemberInvite } from './member-invites/accept-member-invite'
 import { createMemberInvite } from './member-invites/create-member-invite'
@@ -58,6 +59,7 @@ export async function routes(app: FastifyInstance) {
 
   // Event routes
   app.register(createEvent)
+  app.register(getEvent)
   app.register(getEvents)
 
   // Sport routes

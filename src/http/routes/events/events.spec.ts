@@ -340,4 +340,37 @@ describe('Events (e2e)', () => {
       expect(response.body.events[0].id).toEqual(standaloneEvent.id)
     })
   })
+
+  describe('Get Event', () => {
+    it('should be able to get an event by slug', async () => {
+      const { user, token } = await createAndAuthenticateUser(app)
+      const event = await prisma.event.create({
+        data: {
+          name: 'Test Event',
+          slug: `test-event-${faker.string.uuid()}`,
+          startDate: new Date(),
+          ownerId: user.id,
+          paymentModel: 'FREE',
+        },
+      })
+
+      const response = await request(app.server)
+        .get(`/events/${event.slug}`)
+        .set('Authorization', `Bearer ${token}`)
+
+      expect(response.statusCode).toEqual(200)
+      expect(response.body).toHaveProperty('event')
+      expect(response.body.event.name).toEqual('Test Event')
+    })
+
+    it('should return 400 if event does not exist', async () => {
+      const { token } = await createAndAuthenticateUser(app)
+
+      const response = await request(app.server)
+        .get('/events/non-existing-slug')
+        .set('Authorization', `Bearer ${token}`)
+
+      expect(response.statusCode).toEqual(400)
+    })
+  })
 })

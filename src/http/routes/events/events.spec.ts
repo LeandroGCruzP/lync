@@ -45,9 +45,11 @@ describe('Events (e2e)', () => {
       const { token } = await createAndAuthenticateUser(app)
       const name = faker.lorem.words(3)
 
-      const sport = await prisma.sport.create({
-        data: {
-          name: faker.lorem.word(),
+      const sport = await prisma.sport.upsert({
+        where: { name: 'SOCCER' },
+        update: {},
+        create: {
+          name: 'SOCCER',
           sportType: 'TEAM',
           competitionFormat: 'MATCH',
         },

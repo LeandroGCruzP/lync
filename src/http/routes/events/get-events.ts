@@ -1,4 +1,4 @@
-import { PaymentModel } from "@prisma/client";
+import { PaymentModel, SportName } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -41,7 +41,7 @@ export async function getEvents(app: FastifyInstance) {
                 }).nullable(),
                 sport: z.object({
                   id: z.string(),
-                  name: z.string(),
+                  name: z.enum(SportName),
                 }).nullable(),
               }))
             })

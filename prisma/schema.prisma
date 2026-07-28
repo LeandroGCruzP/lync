@@ -141,9 +141,16 @@ enum CompetitionFormat {
   ELIMINATION
 }
 
+enum SportName {
+  BASKETBALL
+  SOCCER
+  SWIMMING
+  RUNNING
+}
+
 model Sport {
   id                String            @id @default(uuid())
-  name              String
+  name              SportName         @unique
   sportType         SportType
   competitionFormat CompetitionFormat
 

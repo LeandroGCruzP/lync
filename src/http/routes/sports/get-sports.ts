@@ -1,3 +1,4 @@
+import { SportName } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -19,7 +20,7 @@ export async function getSports(app: FastifyInstance) {
             200: z.object({
               sports: z.array(z.object({
                 id: z.string().uuid(),
-                name: z.string(),
+                name: z.enum(SportName),
               }))
             })
           }

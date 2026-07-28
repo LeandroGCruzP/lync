@@ -7,6 +7,7 @@ import { resetPassword } from './auth/reset-password'
 import { createEvent } from './events/create-event'
 import { getEvent } from './events/get-event'
 import { getEvents } from './events/get-events'
+import { registerForEvent } from './events/register-for-event'
 import { acceptMemberInvite } from './member-invites/accept-member-invite'
 import { createMemberInvite } from './member-invites/create-member-invite'
 import { getMemberInvite } from './member-invites/get-member-invite'
@@ -25,6 +26,17 @@ import { shutdownOrganization } from './organizations/shutdown-organization'
 import { transferOrganization } from './organizations/transfer-organization'
 import { updateOrganization } from './organizations/update-organization'
 import { getSports } from './sports/get-sports'
+import { acceptTeamInvite } from './team-invites/accept-team-invite'
+import { createTeamInvite } from './team-invites/create-team-invite'
+import { getPendingTeamInvites } from './team-invites/get-pending-team-invites'
+import { rejectTeamInvite } from './team-invites/reject-team-invite'
+import { revokeTeamInvite } from './team-invites/revoke-team-invite'
+import { createTeam } from './teams/create-team'
+import { deleteTeam } from './teams/delete-team'
+import { getTeam } from './teams/get-team'
+import { getTeams } from './teams/get-teams'
+import { removePlayer } from './teams/remove-player'
+import { updateTeam } from './teams/update-team'
 
 export async function routes(app: FastifyInstance) {
   // Auth routes
@@ -61,7 +73,23 @@ export async function routes(app: FastifyInstance) {
   app.register(createEvent)
   app.register(getEvent)
   app.register(getEvents)
+  app.register(registerForEvent)
 
   // Sport routes
   app.register(getSports)
+
+  // Team routes
+  app.register(createTeam)
+  app.register(getTeams)
+  app.register(getTeam)
+  app.register(updateTeam)
+  app.register(deleteTeam)
+  app.register(removePlayer)
+
+  // Team invite routes
+  app.register(createTeamInvite)
+  app.register(getPendingTeamInvites)
+  app.register(acceptTeamInvite)
+  app.register(rejectTeamInvite)
+  app.register(revokeTeamInvite)
 }

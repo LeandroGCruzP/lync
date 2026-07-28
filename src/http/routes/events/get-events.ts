@@ -18,6 +18,7 @@ export async function getEvents(app: FastifyInstance) {
           security: [{ bearerAuth: [] }],
           querystring: z.object({
             organizationSlug: z.string().optional(),
+            teamSlug: z.string().optional(),
             filter: z.enum(['standalone']).optional(),
           }),
           response: {
@@ -50,7 +51,42 @@ export async function getEvents(app: FastifyInstance) {
       },
       async (request, reply) => {
         const userId = await request.getCurrentUserId()
-        const { organizationSlug, filter } = request.query
+        const { organizationSlug, teamSlug, filter } = request.query
+
+        let whereCondition: any = {}
+
+        if (teamSlug) {
+          whereCondition = {
+            participants: {
+              some: {
+                team: {
+                  slug: teamSlug,
+                  players: {
+                    some: {
+                      userId,
+                    },
+                  },
+                },
+              },
+            },
+          }
+        } else {
+          whereCondition = {
+            organization: organizationSlug ? { slug: organizationSlug } : (filter === 'standalone' ? null : undefined),
+            OR: [
+              { ownerId: userId },
+              {
+                organization: {
+                  members: {
+                    some: {
+                      userId,
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
 
         const events = await prisma.event.findMany({
           select: {
@@ -79,25 +115,7 @@ export async function getEvents(app: FastifyInstance) {
               }
             },
           },
-          where: {
-            organization: organizationSlug ? { slug: organizationSlug } : (filter === 'standalone' ? null : undefined),
-            AND: [
-              {
-                OR: [
-                  { ownerId: userId },
-                  {
-                    organization: {
-                      members: {
-                        some: {
-                          userId,
-                        }
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          },
+          where: whereCondition,
           orderBy: {
             startDate: 'asc',
           }

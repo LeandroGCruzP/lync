@@ -1,6 +1,6 @@
 import 'fastify';
 
-import { Member, Organization } from '@prisma/client';
+import { Member, Organization, Player, Team } from '@prisma/client';
 
 declare module 'fastify' {
   export interface FastifyRequest {
@@ -8,5 +8,8 @@ declare module 'fastify' {
     getUserMembership(
       slug: string,
     ): Promise<{ organization: Organization; membership: Member }>
+    getTeamMembership(
+      slugOrId: string,
+    ): Promise<{ team: Team; player: Player }>
   }
 }

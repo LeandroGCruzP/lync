@@ -53,12 +53,14 @@ export async function getEvent(app: FastifyInstance) {
                   avatarUrl: z.string().nullable(),
                 }),
               }),
+              isRegistered: z.boolean(),
             }),
           },
         },
       },
       async (request, reply) => {
         const { slug } = request.params
+        const userId = await request.getCurrentUserId()
 
         const event = await prisma.event.findUnique({
           where: { slug },
@@ -101,11 +103,30 @@ export async function getEvent(app: FastifyInstance) {
           throw new BadRequestError('Event not found.')
         }
 
+        const participant = await prisma.participant.findFirst({
+          where: {
+            eventId: event.id,
+            OR: [
+              { userId },
+              {
+                team: {
+                  players: {
+                    some: {
+                      userId,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        })
+
         return reply.status(200).send({
           event: {
             ...event,
             price: event.price ? event.price.toNumber() : null,
           },
+          isRegistered: !!participant,
         })
       },
     )

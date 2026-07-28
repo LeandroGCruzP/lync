@@ -10,11 +10,15 @@ import { permissions } from './permissions'
 import { invitePermission } from './permissions/invite-permissions'
 import { organizationPermission } from './permissions/organization-permissions'
 import { userPermission } from './permissions/user-permissions'
+import { teamPermission } from './permissions/team-permissions'
+import { teamInvitePermission } from './permissions/team-invite-permissions'
 
 const AppAbilitiesSchema = z.union([
   userPermission,
   organizationPermission,
   invitePermission,
+  teamPermission,
+  teamInvitePermission,
   z.tuple([z.literal('manage'), z.literal('all')]),
 ])
 

@@ -165,4 +165,42 @@ describe('Team Join Requests (e2e)', () => {
       expect(deletedRequest).toBeNull()
     })
   })
+
+  describe('Get Pending Join Requests', () => {
+    it('should be able to get pending join requests for admin teams', async () => {
+      const { user: owner, token: ownerToken } = await createAndAuthenticateUser(app)
+      const org = await makeOrganization({ ownerId: owner.id })
+      const team = await makeTeam({ ownerId: owner.id, organizationId: org.id })
+
+      const requester = await makeUser()
+
+      // Create a join request
+      const joinRequest = await prisma.teamJoinRequest.create({
+        data: {
+          teamId: team.id,
+          userId: requester.id,
+        },
+      })
+
+      const response = await request(app.server)
+        .get('/team-join-requests/pending')
+        .set('Authorization', `Bearer ${ownerToken}`)
+
+      expect(response.statusCode).toEqual(200)
+      expect(response.body).toHaveProperty('requests')
+      expect(response.body.requests).toHaveLength(1)
+      expect(response.body.requests[0]).toMatchObject({
+        id: joinRequest.id,
+        team: {
+          id: team.id,
+          name: team.name,
+          slug: team.slug,
+        },
+        user: {
+          id: requester.id,
+          name: requester.name,
+        },
+      })
+    })
+  })
 })

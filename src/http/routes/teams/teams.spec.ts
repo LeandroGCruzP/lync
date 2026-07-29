@@ -171,5 +171,29 @@ describe('Teams (e2e)', () => {
       expect(response.body.teams[0].slug).toEqual(standaloneTeamSlug)
       expect(response.body.teams[0].organization).toBeNull()
     })
+
+    it('should not return teams of organizations the user is a member of if they are not a player or owner of that team', async () => {
+      const { user, token } = await createAndAuthenticateUser(app)
+      const org = await makeOrganization({ ownerId: user.id })
+
+      const anotherUser = await makeUser()
+
+      // Team in the organization owned by another user (current user is member of org, but not in the team)
+      await prisma.team.create({
+        data: {
+          name: faker.lorem.words(3),
+          slug: faker.lorem.slug(),
+          ownerId: anotherUser.id,
+          organizationId: org.id,
+        },
+      })
+
+      const response = await request(app.server)
+        .get('/teams')
+        .set('Authorization', `Bearer ${token}`)
+
+      expect(response.statusCode).toEqual(200)
+      expect(response.body.teams).toHaveLength(0) // should not return the team they are not in
+    })
   })
 })

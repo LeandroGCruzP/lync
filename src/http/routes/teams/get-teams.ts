@@ -117,15 +117,6 @@ export async function getTeams(app: FastifyInstance) {
                   },
                 },
               },
-              {
-                organization: {
-                  members: {
-                    some: {
-                      userId,
-                    },
-                  },
-                },
-              },
             ],
           }
         }

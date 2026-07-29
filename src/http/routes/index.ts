@@ -4,6 +4,9 @@ import { createAccount } from './auth/create-account'
 import { getProfile } from './auth/get-profile'
 import { requestPasswordRecover } from './auth/request-password-recover'
 import { resetPassword } from './auth/reset-password'
+import { acceptEventInvite } from './event-invites/accept-event-invite'
+import { getPendingEventInvites } from './event-invites/get-pending-event-invites'
+import { rejectEventInvite } from './event-invites/reject-event-invite'
 import { createEvent } from './events/create-event'
 import { getEvent } from './events/get-event'
 import { getEvents } from './events/get-events'
@@ -33,6 +36,7 @@ import { rejectTeamInvite } from './team-invites/reject-team-invite'
 import { revokeTeamInvite } from './team-invites/revoke-team-invite'
 import { acceptJoinRequest } from './team-join-requests/accept-join-request'
 import { createJoinRequest } from './team-join-requests/create-join-request'
+import { getPendingJoinRequests } from './team-join-requests/get-pending-join-requests'
 import { rejectJoinRequest } from './team-join-requests/reject-join-request'
 import { createTeam } from './teams/create-team'
 import { deleteTeam } from './teams/delete-team'
@@ -78,6 +82,11 @@ export async function routes(app: FastifyInstance) {
   app.register(getEvents)
   app.register(registerForEvent)
 
+  // Event invite routes
+  app.register(getPendingEventInvites)
+  app.register(acceptEventInvite)
+  app.register(rejectEventInvite)
+
   // Sport routes
   app.register(getSports)
 
@@ -100,4 +109,5 @@ export async function routes(app: FastifyInstance) {
   app.register(createJoinRequest)
   app.register(acceptJoinRequest)
   app.register(rejectJoinRequest)
+  app.register(getPendingJoinRequests)
 }

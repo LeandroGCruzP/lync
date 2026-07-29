@@ -5,6 +5,7 @@ import { auth } from '~/http/middlewares/auth'
 import { prisma } from '~/lib/prisma'
 import { createSlug } from '~/utils/create-slug'
 import { BadRequestError } from '../_errors/bad-request-error'
+import { UnauthorizedError } from '../_errors/unauthorized-error'
 
 export async function createTeam(app: FastifyInstance) {
   app
@@ -33,6 +34,23 @@ export async function createTeam(app: FastifyInstance) {
       async (request, reply) => {
         const userId = await request.getCurrentUserId()
         const { name, description, avatarUrl, organizationId } = request.body
+
+        if (organizationId) {
+          const member = await prisma.member.findUnique({
+            where: {
+              organizationId_userId: {
+                organizationId,
+                userId,
+              },
+            },
+          })
+
+          if (!member || member.role !== 'ADMIN') {
+            throw new UnauthorizedError(
+              'You are not allowed to create teams for this organization'
+            )
+          }
+        }
 
         const slug = createSlug(name)
 

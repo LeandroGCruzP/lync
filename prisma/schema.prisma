@@ -65,6 +65,7 @@ model User {
   players       Player[]
   teamInvites   TeamInvite[]
   participants  Participant[]
+  teamJoinRequests TeamJoinRequest[]
 
   @@map("users")
 }
@@ -267,6 +268,7 @@ model Team {
   teamInvites  TeamInvite[]
   players      Player[]
   participants Participant[]
+  joinRequests TeamJoinRequest[]
 
   @@map("teams")
 }
@@ -307,4 +309,18 @@ model Player {
 
   @@unique([teamId, userId])
   @@map("players")
+}
+
+model TeamJoinRequest {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId String @map("team_id")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  @@unique([teamId, userId])
+  @@map("team_join_requests")
 }

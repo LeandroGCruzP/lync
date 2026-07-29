@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { Organization, User } from '@prisma/client'
+import { Organization, Team, User } from '@prisma/client'
 import { prisma } from '~/lib/prisma'
 
 export async function makeUser(override: Partial<User> = {}) {
@@ -30,4 +30,29 @@ export async function makeOrganization(override: Partial<Organization> = {}) {
       ...override,
     },
   })
+}
+
+export async function makeTeam(override: Partial<Team> = {}) {
+  const ownerId = override.ownerId || (await makeUser()).id
+  const team = await prisma.team.create({
+    data: {
+      name: faker.company.name(),
+      slug: faker.lorem.slug(),
+      description: faker.lorem.sentence(),
+      ownerId,
+      organizationId: override.organizationId ?? null,
+      ...override,
+    },
+  })
+
+  // Owner should automatically be an ADMIN player of the team
+  await prisma.player.create({
+    data: {
+      teamId: team.id,
+      userId: ownerId,
+      role: 'ADMIN',
+    },
+  })
+
+  return team
 }

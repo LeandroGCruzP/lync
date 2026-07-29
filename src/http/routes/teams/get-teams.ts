@@ -15,6 +15,10 @@ export async function getTeams(app: FastifyInstance) {
           tags: ['teams'],
           summary: 'List teams the user belongs to',
           security: [{ bearerAuth: [] }],
+          querystring: z.object({
+            organizationSlug: z.string().optional(),
+            filter: z.enum(['standalone']).optional(),
+          }),
           response: {
             200: z.object({
               teams: z.array(
@@ -32,12 +36,25 @@ export async function getTeams(app: FastifyInstance) {
                     email: z.string().email(),
                     avatarUrl: z.string().nullable(),
                   }),
+                  organization: z
+                    .object({
+                      id: z.string().uuid(),
+                      name: z.string(),
+                      slug: z.string(),
+                      avatarUrl: z.string().nullable(),
+                    })
+                    .nullable(),
                   _count: z.object({
                     players: z.number(),
                   }),
                   players: z.array(
                     z.object({
                       role: z.enum(['ADMIN', 'PLAYER']),
+                    })
+                  ),
+                  joinRequests: z.array(
+                    z.object({
+                      id: z.string().uuid(),
                     })
                   ),
                 })
@@ -48,9 +65,36 @@ export async function getTeams(app: FastifyInstance) {
       },
       async (request, reply) => {
         const userId = await request.getCurrentUserId()
+        const { organizationSlug, filter } = request.query
 
-        const teams = await prisma.team.findMany({
-          where: {
+        let whereCondition: any = {}
+
+        if (organizationSlug) {
+          whereCondition = {
+            organization: { slug: organizationSlug },
+            OR: [
+              { ownerId: userId },
+              {
+                players: {
+                  some: {
+                    userId,
+                  },
+                },
+              },
+              {
+                organization: {
+                  members: {
+                    some: {
+                      userId,
+                    },
+                  },
+                },
+              },
+            ],
+          }
+        } else if (filter === 'standalone') {
+          whereCondition = {
+            organization: null,
             OR: [
               { ownerId: userId },
               {
@@ -61,13 +105,47 @@ export async function getTeams(app: FastifyInstance) {
                 },
               },
             ],
-          },
+          }
+        } else {
+          whereCondition = {
+            OR: [
+              { ownerId: userId },
+              {
+                players: {
+                  some: {
+                    userId,
+                  },
+                },
+              },
+              {
+                organization: {
+                  members: {
+                    some: {
+                      userId,
+                    },
+                  },
+                },
+              },
+            ],
+          }
+        }
+
+        const teams = await prisma.team.findMany({
+          where: whereCondition,
           include: {
             owner: {
               select: {
                 id: true,
                 name: true,
                 email: true,
+                avatarUrl: true,
+              },
+            },
+            organization: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
                 avatarUrl: true,
               },
             },
@@ -82,6 +160,14 @@ export async function getTeams(app: FastifyInstance) {
               },
               select: {
                 role: true,
+              },
+            },
+            joinRequests: {
+              where: {
+                userId,
+              },
+              select: {
+                id: true,
               },
             },
           },

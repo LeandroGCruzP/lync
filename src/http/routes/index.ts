@@ -31,6 +31,9 @@ import { createTeamInvite } from './team-invites/create-team-invite'
 import { getPendingTeamInvites } from './team-invites/get-pending-team-invites'
 import { rejectTeamInvite } from './team-invites/reject-team-invite'
 import { revokeTeamInvite } from './team-invites/revoke-team-invite'
+import { acceptJoinRequest } from './team-join-requests/accept-join-request'
+import { createJoinRequest } from './team-join-requests/create-join-request'
+import { rejectJoinRequest } from './team-join-requests/reject-join-request'
 import { createTeam } from './teams/create-team'
 import { deleteTeam } from './teams/delete-team'
 import { getTeam } from './teams/get-team'
@@ -92,4 +95,9 @@ export async function routes(app: FastifyInstance) {
   app.register(acceptTeamInvite)
   app.register(rejectTeamInvite)
   app.register(revokeTeamInvite)
+
+  // Team join request routes
+  app.register(createJoinRequest)
+  app.register(acceptJoinRequest)
+  app.register(rejectJoinRequest)
 }

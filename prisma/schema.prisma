@@ -173,6 +173,7 @@ model Event {
   playersPerTeam Int?
   price          Decimal?
   paymentModel   PaymentModel @default(FREE) @map("payment_model")
+  accessType     EventAccessType @default(PUBLIC_OPEN) @map("access_type")
 
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Restrict)
   ownerId String @map("owner_id")
@@ -187,6 +188,13 @@ model Event {
   participants  Participant[]
 
   @@map("events")
+}
+
+enum EventAccessType {
+  PUBLIC_OPEN
+  PUBLIC_READ_ONLY
+  INVITE_ONLY
+  MEMBERS_ONLY
 }
 
 enum PaymentModel {

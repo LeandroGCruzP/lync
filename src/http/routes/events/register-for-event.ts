@@ -43,6 +43,47 @@ export async function registerForEvent(app: FastifyInstance) {
           throw new BadRequestError('Event not found')
         }
 
+        // Access checks
+        if (event.accessType === 'PUBLIC_READ_ONLY') {
+          throw new BadRequestError('Registrations are not allowed for this event.')
+        }
+
+        if (event.accessType === 'INVITE_ONLY') {
+          const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { email: true }
+          })
+          if (!user) {
+            throw new BadRequestError('User not found')
+          }
+
+          const invite = await prisma.eventInvite.findUnique({
+            where: {
+              email_eventId: {
+                email: user.email,
+                eventId: event.id,
+              }
+            }
+          })
+
+          if (!invite && event.ownerId !== userId) {
+            throw new UnauthorizedError('You must be invited to register for this event.')
+          }
+        } else if (event.accessType === 'MEMBERS_ONLY' && event.organizationId) {
+          const member = await prisma.member.findUnique({
+            where: {
+              organizationId_userId: {
+                organizationId: event.organizationId,
+                userId,
+              }
+            }
+          })
+
+          if (!member && event.ownerId !== userId) {
+            throw new UnauthorizedError('Only members of the hosting organization can register for this event.')
+          }
+        }
+
         const isTeamEvent = event.playersPerTeam !== null && event.playersPerTeam > 1
 
         const paymentStatus = event.paymentModel === 'FREE' ? 'NOT_REQUIRED' : 'PENDING'

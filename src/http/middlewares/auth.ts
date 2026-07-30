@@ -15,6 +15,15 @@ export const auth = fastifyPlugin(async (app: FastifyInstance) => {
       }
     }
 
+    request.getCurrentUserIdOptional = async () => {
+      try {
+        const { sub } = await request.jwtVerify<{ sub: string }>()
+        return sub
+      } catch {
+        return null
+      }
+    }
+
     request.getUserMembership = async (slug: string) => {
       const userId = await request.getCurrentUserId()
       const member = await prisma.member.findFirst({

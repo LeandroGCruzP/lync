@@ -1,4 +1,4 @@
-import { PaymentModel } from "@prisma/client";
+import { EventAccessType, PaymentModel } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -25,6 +25,7 @@ export async function createEvent(app: FastifyInstance) {
             name: z.string().min(3, { message: 'Name must be at least 3 characters long' }),
             organizationId: z.uuid().optional(),
             paymentModel: z.enum(PaymentModel).default(PaymentModel.FREE),
+            accessType: z.enum(EventAccessType).default(EventAccessType.PUBLIC_OPEN),
             playersPerTeam: z.number().optional(),
             price: z.number().optional(),
             slots: z.number().optional(),
@@ -36,7 +37,11 @@ export async function createEvent(app: FastifyInstance) {
       },
       async (request, reply) => {
         const userId = await request.getCurrentUserId()
-        const { name, description, startDate, endDate, sportId, organizationId, price, paymentModel, slots, playersPerTeam } = request.body
+        const { name, description, startDate, endDate, sportId, organizationId, price, paymentModel, accessType, slots, playersPerTeam } = request.body
+
+        if (accessType === 'MEMBERS_ONLY' && !organizationId) {
+          throw new BadRequestError('Members-only events must be associated with an organization.')
+        }
 
         if (organizationId) {
           const member = await prisma.member.findUnique({
@@ -77,6 +82,7 @@ export async function createEvent(app: FastifyInstance) {
             playersPerTeam,
             price,
             paymentModel,
+            accessType,
           }
         })
 

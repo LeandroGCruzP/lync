@@ -8,7 +8,6 @@ async function seed() {
   // Clear existing data in the correct order (respecting foreign keys)
   await prisma.participant.deleteMany()
   await prisma.eventInvite.deleteMany()
-  await prisma.eventSettings.deleteMany()
   await prisma.event.deleteMany()
   await prisma.player.deleteMany()
   await prisma.teamInvite.deleteMany()
@@ -72,7 +71,7 @@ async function seed() {
   // Creating sports
   const footballSport = await prisma.sport.create({
     data: {
-      name: 'Football',
+      name: 'SOCCER',
       sportType: 'TEAM',
       competitionFormat: 'MATCH',
     },
@@ -80,7 +79,7 @@ async function seed() {
 
   const basketballSport = await prisma.sport.create({
     data: {
-      name: 'Basketball',
+      name: 'BASKETBALL',
       sportType: 'TEAM',
       competitionFormat: 'SCORE_BASED',
     },
@@ -89,7 +88,7 @@ async function seed() {
 
   const runningSport = await prisma.sport.create({
     data: {
-      name: 'Running',
+      name: 'RUNNING',
       sportType: 'INDIVIDUAL',
       competitionFormat: 'TIME_TRIAL',
     },
@@ -188,12 +187,8 @@ async function seed() {
       ownerId: user1.id,
       organizationId: org1.id,
       sportId: footballSport.id,
-      eventSettings: {
-        create: {
-          slots: 16,
-          playersPerTeam: 11,
-        },
-      },
+      slots: 16,
+      playersPerTeam: 11,
       participants: {
         createMany: {
           data: [
@@ -223,12 +218,8 @@ async function seed() {
       ownerId: user2.id,
       organizationId: org2.id,
       sportId: basketballSport.id,
-      eventSettings: {
-        create: {
-          slots: 12,
-          playersPerTeam: 5,
-        },
-      },
+      slots: 12,
+      playersPerTeam: 5,
       participants: {
         createMany: {
           data: [
@@ -251,11 +242,7 @@ async function seed() {
       startDate: new Date('2025-05-20'),
       ownerId: user3.id,
       sportId: runningSport.id,
-      eventSettings: {
-        create: {
-          slots: 1000,
-        },
-      },
+      slots: 1000,
       participants: {
         createMany: {
           data: [

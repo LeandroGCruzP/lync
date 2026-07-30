@@ -374,5 +374,133 @@ describe('Events (e2e)', () => {
 
       expect(response.statusCode).toEqual(400)
     })
+
+    it('should not be able to get an INVITE_ONLY event if uninvited', async () => {
+      const { user: owner } = await createAndAuthenticateUser(app)
+      const { token: otherToken } = await createAndAuthenticateUser(app)
+
+      const event = await prisma.event.create({
+        data: {
+          name: 'Private Event',
+          slug: `private-event-${faker.string.uuid()}`,
+          startDate: new Date(),
+          ownerId: owner.id,
+          accessType: 'INVITE_ONLY',
+        },
+      })
+
+      const response = await request(app.server)
+        .get(`/events/${event.slug}`)
+        .set('Authorization', `Bearer ${otherToken}`)
+
+      expect(response.statusCode).toEqual(401)
+    })
+
+    it('should be able to get an INVITE_ONLY event if invited', async () => {
+      const { user: owner } = await createAndAuthenticateUser(app)
+      const { user: invitee, token: inviteeToken } = await createAndAuthenticateUser(app)
+
+      const event = await prisma.event.create({
+        data: {
+          name: 'Private Event 2',
+          slug: `private-event-2-${faker.string.uuid()}`,
+          startDate: new Date(),
+          ownerId: owner.id,
+          accessType: 'INVITE_ONLY',
+        },
+      })
+
+      await prisma.eventInvite.create({
+        data: {
+          email: invitee.email,
+          eventId: event.id,
+          role: 'PARTICIPANT',
+        },
+      })
+
+      const response = await request(app.server)
+        .get(`/events/${event.slug}`)
+        .set('Authorization', `Bearer ${inviteeToken}`)
+
+      expect(response.statusCode).toEqual(200)
+      expect(response.body.event.name).toEqual('Private Event 2')
+    })
+
+    it('should not be able to register for a PUBLIC_READ_ONLY event', async () => {
+      const { user, token } = await createAndAuthenticateUser(app)
+
+      const event = await prisma.event.create({
+        data: {
+          name: 'Read Only Event',
+          slug: `read-only-event-${faker.string.uuid()}`,
+          startDate: new Date(),
+          ownerId: user.id,
+          accessType: 'PUBLIC_READ_ONLY',
+        },
+      })
+
+      const response = await request(app.server)
+        .post(`/events/${event.slug}/register`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({})
+
+      expect(response.statusCode).toEqual(400)
+      expect(response.body.message).toContain('Registrations are not allowed')
+    })
+  })
+
+  describe('Update Event', () => {
+    it('should be able to update an event as the owner', async () => {
+      const { user, token } = await createAndAuthenticateUser(app)
+      const event = await prisma.event.create({
+        data: {
+          name: `Old Event Name - ${faker.string.uuid()}`,
+          slug: `old-event-name-${faker.string.uuid()}`,
+          startDate: new Date(),
+          ownerId: user.id,
+        },
+      })
+
+      const newName = `New Event Name - ${faker.string.uuid()}`
+
+      const response = await request(app.server)
+        .put(`/events/${event.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          name: newName,
+          description: 'Updated Description',
+        })
+
+      expect(response.statusCode).toEqual(204)
+
+      const updated = await prisma.event.findUnique({
+        where: { id: event.id },
+      })
+      expect(updated?.name).toEqual(newName)
+      expect(updated?.description).toEqual('Updated Description')
+    })
+
+    it('should not be able to update an event if not authorized', async () => {
+      const { user: owner } = await createAndAuthenticateUser(app)
+      const { token: otherToken } = await createAndAuthenticateUser(app)
+
+      const event = await prisma.event.create({
+        data: {
+          name: 'Unauthorized Edit',
+          slug: `unauthorized-edit-${faker.string.uuid()}`,
+          startDate: new Date(),
+          ownerId: owner.id,
+        },
+      })
+
+      const response = await request(app.server)
+        .put(`/events/${event.id}`)
+        .set('Authorization', `Bearer ${otherToken}`)
+        .send({
+          name: 'Hacked Event Name',
+        })
+
+      expect(response.statusCode).toEqual(401)
+    })
   })
 })

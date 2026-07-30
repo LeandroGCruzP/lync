@@ -11,6 +11,7 @@ import { createEvent } from './events/create-event'
 import { getEvent } from './events/get-event'
 import { getEvents } from './events/get-events'
 import { registerForEvent } from './events/register-for-event'
+import { updateEvent } from './events/update-event'
 import { acceptMemberInvite } from './member-invites/accept-member-invite'
 import { createMemberInvite } from './member-invites/create-member-invite'
 import { getMemberInvite } from './member-invites/get-member-invite'
@@ -81,6 +82,7 @@ export async function routes(app: FastifyInstance) {
   app.register(getEvent)
   app.register(getEvents)
   app.register(registerForEvent)
+  app.register(updateEvent)
 
   // Event invite routes
   app.register(getPendingEventInvites)
